@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/academic_events_db}
+    username: ${DB_USERNAME:academic_events}
+    password: ${DB_PASSWORD:academic_events}
+  jpa:
+    show-sql: true
