@@ -40,9 +40,6 @@ dependencies {
 	// OpenAPI/Swagger
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 
-	// Rate limiting sobre Redis
-	implementation("com.bucket4j:bucket4j-redis:8.10.1")
-
 	// Reportes
 	implementation("org.apache.poi:poi-ooxml:5.5.1")
 	implementation("com.github.librepdf:openpdf:3.0.5")

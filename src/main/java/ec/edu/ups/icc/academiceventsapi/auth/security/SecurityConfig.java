@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import ec.edu.ups.icc.academiceventsapi.ratelimit.RateLimitFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,15 +29,18 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
     private final List<String> allowedOrigins;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                           RateLimitFilter rateLimitFilter,
                            RestAuthenticationEntryPoint restAuthenticationEntryPoint,
                            RestAccessDeniedHandler restAccessDeniedHandler,
                            @Value("${app.cors.allowed-origins}") List<String> allowedOrigins) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitFilter = rateLimitFilter;
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.restAccessDeniedHandler = restAccessDeniedHandler;
         this.allowedOrigins = allowedOrigins;
@@ -80,7 +84,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

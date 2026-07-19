@@ -1,7 +1,9 @@
 package ec.edu.ups.icc.academiceventsapi.common.exception;
 
+import ec.edu.ups.icc.academiceventsapi.ratelimit.RateLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -15,6 +17,15 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiError> handleRateLimitExceeded(RateLimitExceededException ex, HttpServletRequest request) {
+        ApiError body = new ApiError(Instant.now(), HttpStatus.TOO_MANY_REQUESTS.value(), ex.getErrorCode(),
+                ex.getMessage(), request.getRequestURI(), List.of());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(body);
+    }
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApiException(ApiException ex, HttpServletRequest request) {

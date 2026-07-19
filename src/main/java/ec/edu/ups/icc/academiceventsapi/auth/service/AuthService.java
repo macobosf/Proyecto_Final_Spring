@@ -7,7 +7,7 @@ import ec.edu.ups.icc.academiceventsapi.auth.dto.RegisterRequest;
 
 public interface AuthService {
 
-    AuthResponse register(RegisterRequest request);
+    AuthResponse register(RegisterRequest request, String ip);
 
     AuthResponse login(LoginRequest request, String ip);
 

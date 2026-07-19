@@ -11,6 +11,10 @@ import ec.edu.ups.icc.academiceventsapi.auth.repository.RefreshTokenRepository;
 import ec.edu.ups.icc.academiceventsapi.auth.security.JwtProperties;
 import ec.edu.ups.icc.academiceventsapi.auth.security.JwtService;
 import ec.edu.ups.icc.academiceventsapi.common.exception.DuplicateResourceException;
+import ec.edu.ups.icc.academiceventsapi.ratelimit.LoginAttemptService;
+import ec.edu.ups.icc.academiceventsapi.ratelimit.RateLimitExceededException;
+import ec.edu.ups.icc.academiceventsapi.ratelimit.RateLimitResult;
+import ec.edu.ups.icc.academiceventsapi.ratelimit.RateLimiterService;
 import ec.edu.ups.icc.academiceventsapi.user.entity.Role;
 import ec.edu.ups.icc.academiceventsapi.user.entity.RoleName;
 import ec.edu.ups.icc.academiceventsapi.user.entity.User;
@@ -29,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 
@@ -43,12 +48,15 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
+    private final RateLimiterService rateLimiterService;
+    private final LoginAttemptService loginAttemptService;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                             UserRoleRepository userRoleRepository, RefreshTokenRepository refreshTokenRepository,
                             PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
-                            JwtService jwtService, JwtProperties jwtProperties) {
+                            JwtService jwtService, JwtProperties jwtProperties,
+                            RateLimiterService rateLimiterService, LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
@@ -57,11 +65,19 @@ public class AuthServiceImpl implements AuthService {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.jwtProperties = jwtProperties;
+        this.rateLimiterService = rateLimiterService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Override
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request, String ip) {
+        RateLimitResult rateLimit = rateLimiterService.tryConsume("rate-limit:register:" + ip, 3, Duration.ofHours(1));
+        if (!rateLimit.allowed()) {
+            throw new RateLimitExceededException("Demasiados registros desde esta dirección. Intente más tarde.",
+                    rateLimit.retryAfterSeconds());
+        }
+
         String email = request.email().toLowerCase();
         if (userRepository.existsByEmail(email)) {
             throw new DuplicateResourceException("Ya existe una cuenta registrada con ese correo.");
@@ -83,13 +99,30 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse login(LoginRequest request, String ip) {
         String email = request.email().toLowerCase();
+        String attemptKey = ip + ":" + email;
+
+        if (loginAttemptService.isBlocked(attemptKey)) {
+            throw new RateLimitExceededException(
+                    "Cuenta bloqueada temporalmente por demasiados intentos fallidos. Intente más tarde.",
+                    loginAttemptService.getBlockRemainingSeconds(attemptKey));
+        }
+
+        RateLimitResult rateLimit = rateLimiterService.tryConsume("rate-limit:login:" + attemptKey, 5,
+                Duration.ofMinutes(1));
+        if (!rateLimit.allowed()) {
+            throw new RateLimitExceededException(
+                    "Demasiadas solicitudes de inicio de sesión. Intente más tarde.", rateLimit.retryAfterSeconds());
+        }
 
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, request.password()));
         } catch (AuthenticationException ex) {
+            loginAttemptService.registerFailure(attemptKey);
             throw new InvalidCredentialsException();
         }
+
+        loginAttemptService.registerSuccess(attemptKey);
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(InvalidCredentialsException::new);

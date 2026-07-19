@@ -33,8 +33,8 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
-        return authService.register(request);
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest servletRequest) {
+        return authService.register(request, servletRequest.getRemoteAddr());
     }
 
     @PostMapping("/login")
