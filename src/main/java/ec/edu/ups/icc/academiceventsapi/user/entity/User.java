@@ -116,4 +116,8 @@ public class User {
     public List<UserRole> getUserRoles() {
         return userRoles;
     }
+
+    public boolean hasRole(RoleName roleName) {
+        return userRoles.stream().anyMatch(userRole -> userRole.getRole().getName() == roleName);
+    }
 }

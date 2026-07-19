@@ -1,6 +1,7 @@
 package ec.edu.ups.icc.academiceventsapi.registration.repository;
 
 import ec.edu.ups.icc.academiceventsapi.registration.entity.Registration;
+import ec.edu.ups.icc.academiceventsapi.registration.entity.RegistrationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -11,4 +12,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     Optional<Registration> findByRegistrationCode(UUID registrationCode);
 
     boolean existsByEventIdAndParticipantId(Long eventId, Long participantId);
+
+    boolean existsByEventId(Long eventId);
+
+    long countByEventIdAndStatus(Long eventId, RegistrationStatus status);
 }
