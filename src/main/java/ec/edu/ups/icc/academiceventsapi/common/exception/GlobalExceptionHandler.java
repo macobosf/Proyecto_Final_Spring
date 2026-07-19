@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +39,13 @@ public class GlobalExceptionHandler {
                 .toList();
         return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
                 "La solicitud contiene datos inválidos.", request, fieldErrors);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex,
+                                                              HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "CONCURRENT_MODIFICATION",
+                "El recurso fue modificado por otra operación. Intente nuevamente.", request, List.of());
     }
 
     @ExceptionHandler(AccessDeniedException.class)

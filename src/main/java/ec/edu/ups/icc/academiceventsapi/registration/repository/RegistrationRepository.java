@@ -3,11 +3,13 @@ package ec.edu.ups.icc.academiceventsapi.registration.repository;
 import ec.edu.ups.icc.academiceventsapi.registration.entity.Registration;
 import ec.edu.ups.icc.academiceventsapi.registration.entity.RegistrationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface RegistrationRepository extends JpaRepository<Registration, Long> {
+public interface RegistrationRepository extends JpaRepository<Registration, Long>,
+        JpaSpecificationExecutor<Registration> {
 
     Optional<Registration> findByRegistrationCode(UUID registrationCode);
 
