@@ -4,6 +4,8 @@ import ec.edu.ups.icc.academiceventsapi.registration.entity.Registration;
 import ec.edu.ups.icc.academiceventsapi.registration.entity.RegistrationStatus;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.Instant;
+
 public final class RegistrationSpecifications {
 
     private RegistrationSpecifications() {
@@ -21,5 +23,13 @@ public final class RegistrationSpecifications {
 
     public static Specification<Registration> hasStatus(RegistrationStatus status) {
         return (root, query, cb) -> status == null ? null : cb.equal(root.get("status"), status);
+    }
+
+    public static Specification<Registration> registeredFrom(Instant from) {
+        return (root, query, cb) -> from == null ? null : cb.greaterThanOrEqualTo(root.get("registeredAt"), from);
+    }
+
+    public static Specification<Registration> registeredTo(Instant to) {
+        return (root, query, cb) -> to == null ? null : cb.lessThanOrEqualTo(root.get("registeredAt"), to);
     }
 }
