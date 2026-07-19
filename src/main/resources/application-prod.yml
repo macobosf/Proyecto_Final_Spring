@@ -3,5 +3,10 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
   jpa:
     show-sql: false
+
+server:
+  port: ${PORT:8080}
