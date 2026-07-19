@@ -25,3 +25,11 @@ management:
   endpoint:
     health:
       show-details: never
+
+jwt:
+  access-expiration: ${JWT_ACCESS_EXPIRATION:15m}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:7d}
+
+app:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}

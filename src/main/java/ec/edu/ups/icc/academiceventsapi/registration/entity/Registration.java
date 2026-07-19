@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -41,6 +42,7 @@ public class Registration {
     @Column(name = "status", nullable = false, length = 20)
     private RegistrationStatus status = RegistrationStatus.PENDING;
 
+    @CreationTimestamp
     @Column(name = "registered_at", nullable = false, updatable = false)
     private Instant registeredAt;
 
@@ -64,6 +66,7 @@ public class Registration {
         this.registrationCode = UUID.randomUUID();
         this.event = event;
         this.participant = participant;
+        this.statusUpdatedAt = Instant.now();
     }
 
     public Long getId() {
