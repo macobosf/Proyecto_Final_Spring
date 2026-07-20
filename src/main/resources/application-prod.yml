@@ -13,3 +13,8 @@ server:
 
 jwt:
   secret: ${JWT_SECRET}
+
+app:
+  swagger:
+    username: ${SWAGGER_USERNAME}
+    password: ${SWAGGER_PASSWORD}

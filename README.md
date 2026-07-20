@@ -177,7 +177,7 @@ Luego, al levantar la app (`./gradlew bootRun`) con Postgres y Redis corriendo, 
 ## Lo que falta
 
 - Diagrama entidad-relación: ✅ hecho (arriba).
-- Documentación OpenAPI/Swagger: falta configurar el esquema Bearer JWT en la UI y proteger `/swagger-ui/**` y `/v3/api-docs/**` en producción.
+- Documentación OpenAPI/Swagger: ✅ hecho. Esquema Bearer JWT configurado en la UI (botón "Authorize"); en producción `/swagger-ui/**` y `/v3/api-docs/**` quedan protegidos con usuario y contraseña de evaluación (`SWAGGER_USERNAME`/`SWAGGER_PASSWORD`), independientes del login JWT de la API.
 - Pruebas automatizadas (JUnit/Mockito).
 - Colección Postman/Bruno.
 - Dockerfile, `render.yaml` y despliegue en Render.
