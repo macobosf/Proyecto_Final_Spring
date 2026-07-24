@@ -1,0 +1,11 @@
+.git
+.gradle
+build
+bin
+.vscode
+.idea
+*.iml
+HELP.md
+README.md
+CONTEXTO_PROYECTO.md
+sql

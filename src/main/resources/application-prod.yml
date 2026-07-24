@@ -7,6 +7,9 @@ spring:
       maximum-pool-size: 5
   jpa:
     show-sql: false
+  data:
+    redis:
+      url: ${REDIS_URL}
 
 server:
   port: ${PORT:8080}

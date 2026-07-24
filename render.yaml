@@ -1,0 +1,65 @@
+databases:
+  - name: academic-events-db
+    databaseName: academic_events_db
+    user: academic_events
+    plan: free
+    postgresMajorVersion: "17"
+
+services:
+  - type: keyvalue
+    name: academic-events-redis
+    plan: free
+    ipAllowList: [] # solo accesible desde servicios internos de Render, no expuesto a internet
+
+  - type: web
+    name: academic-events-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # Render no expone host/puerto sueltos de Postgres, solo connectionString
+      # (formato postgres://usuario:password@host:puerto/db, no JDBC). Por eso
+      # DB_URL se completa a mano en el dashboard tras crear la base:
+      # jdbc:postgresql://<host>:<puerto>/academic_events_db
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        fromDatabase:
+          name: academic-events-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: academic-events-db
+          property: password
+
+      # Redis sí se puede enlazar completo: Spring Data Redis soporta
+      # spring.data.redis.url (ver application-prod.yml) con el formato
+      # redis://[:password@]host:puerto que entrega Render.
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: academic-events-redis
+          property: connectionString
+
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRATION
+        value: 15m
+      - key: JWT_REFRESH_EXPIRATION
+        value: 7d
+
+      # URL pública del frontend (o del propio Swagger UI para pruebas)
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+      - key: SWAGGER_USERNAME
+        sync: false
+      - key: SWAGGER_PASSWORD
+        generateValue: true
+
+      - key: PORT
+        value: "8080"
