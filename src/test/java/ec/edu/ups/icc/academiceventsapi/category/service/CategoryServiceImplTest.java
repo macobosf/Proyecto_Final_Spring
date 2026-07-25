@@ -78,5 +78,62 @@ public class CategoryServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> categoryServiceImpl.getById(1L));
     }
 
+    // Nombre único: debe actualizar los datos y devolver la categoría mapeada.
+    @Test
+    void update_deberiaActualizarCategoria_cuandoNombreNoEstaDuplicado() {
+        Category category = new Category("Tecnología", "Eventos de tecnología");
+        CategoryRequest request = new CategoryRequest("Ciencia", "Eventos de ciencia");
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.existsByNameIgnoreCaseAndIdNot("Ciencia", 1L)).thenReturn(false);
+        when(categoryMapper.toResponse(category)).thenReturn(
+                new CategoryResponse(1L, "Ciencia", "Eventos de ciencia", true, Instant.now(), Instant.now()));
+
+        CategoryResponse response = categoryServiceImpl.update(1L, request);
+
+        assertThat(response).isNotNull();
+        assertThat(category.getName()).isEqualTo("Ciencia");
+        assertThat(category.getDescription()).isEqualTo("Eventos de ciencia");
+    }
+
+    // Id inexistente: debe lanzar ResourceNotFoundException antes de validar el nombre.
+    @Test
+    void update_deberiaLanzarExcepcion_cuandoCategoriaNoExiste() {
+        CategoryRequest request = new CategoryRequest("Ciencia", "Eventos de ciencia");
+        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryServiceImpl.update(1L, request));
+        verify(categoryRepository, never()).existsByNameIgnoreCaseAndIdNot(any(), any());
+    }
+
+    // Nombre duplicado con otra categoría: debe fallar sin modificar la categoría actual.
+    @Test
+    void update_deberiaLanzarExcepcion_cuandoNombreEstaDuplicado() {
+        Category category = new Category("Tecnología", "Eventos de tecnología");
+        CategoryRequest request = new CategoryRequest("Ciencia", "Eventos de ciencia");
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.existsByNameIgnoreCaseAndIdNot("Ciencia", 1L)).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> categoryServiceImpl.update(1L, request));
+        assertThat(category.getName()).isEqualTo("Tecnología");
+    }
+
+    // Id existente: debe marcar la categoría como inactiva (soft delete).
+    @Test
+    void delete_deberiaDesactivarCategoria_cuandoExiste() {
+        Category category = new Category("Tecnología", "Eventos de tecnología");
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+
+        categoryServiceImpl.delete(1L);
+
+        assertThat(category.isActive()).isFalse();
+    }
+
+    // Id inexistente: debe lanzar ResourceNotFoundException.
+    @Test
+    void delete_deberiaLanzarExcepcion_cuandoNoExiste() {
+        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryServiceImpl.delete(1L));
+    }
 
 }
