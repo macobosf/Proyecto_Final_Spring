@@ -1,8 +1,9 @@
 name: production
 variables:
   - name: baseUrl
-    value: ""
+    value: |
+      https://academic-events-api-2tkw.onrender.com
   - name: accessToken
-    value: ""
+    value: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBhY2FkZW1pYy50ZXN0Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg1MTA1MDYyLCJleHAiOjE3ODUxMDU5NjJ9.zL7XB8MpI8saZaIE8sqF-_sakZeyPiWr3qz_45Q5OnA
   - name: refreshToken
-    value: ""
+    value: Sa5YB_JAGK41gL7jziywaCz-5fFGMbNqW9xFkI00Elu4V5TTLTUwKZmygTXHldQA-N2X5B0wS5ISmxC_6AEi3A
