@@ -1,0 +1,29 @@
+info:
+  name: createOrganizerSessions
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/events/1/sessions"
+  headers:
+    - name: Authorization
+      value: Bearer {{accessToken}}
+  body:
+    type: json
+    data: |
+      {
+        "title": "Charla de apertura",
+        "description": "Introducción al evento",
+        "startAt": "2026-08-15T14:00:00Z",
+        "endAt": "2026-08-15T15:00:00Z",
+        "location": "Auditorio Central",
+        "virtualUrl": null
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,8 @@
+name: production
+variables:
+  - name: baseUrl
+    value: ""
+  - name: accessToken
+    value: ""
+  - name: refreshToken
+    value: ""

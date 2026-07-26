@@ -1,0 +1,34 @@
+info:
+  name: createOrganizer
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/events"
+  headers:
+    - name: Authorization
+      value: Bearer {{accessToken}}
+  body:
+    type: json
+    data: |
+      {
+        "title": "Conferencia Java",
+        "description": "Charlas sobre Spring Boot",
+        "modality": "PRESENTIAL",
+        "location": "Auditorio Central",
+        "virtualUrl": null,
+        "capacity": 100,
+        "registrationStartAt": "2026-08-01T00:00:00Z",
+        "registrationEndAt": "2026-08-10T00:00:00Z",
+        "startAt": "2026-08-15T14:00:00Z",
+        "endAt": "2026-08-15T18:00:00Z",
+        "categoryId": 1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
